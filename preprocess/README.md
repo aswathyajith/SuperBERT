@@ -45,36 +45,32 @@ E.g.,:
 
 # Steps used to preprocess PRO dataset
 
-1) Start with `Grobid_Shadow_Bulk_1Ms_20210113`
+The PRO dataset is provided in a single large file, `Grobid_Shadow_Bulk_1Ms_20210113`, with one line per article, each line being an XML document produced by [GROBID](https://grobid.readthedocs.io/en/latest/). We process these data to create a Postgre database table `shadow` with title, language, journal for each article. 
 
-2) Split into 1M-line files
+Start with `Grobid_Shadow_Bulk_1Ms_20210113`
 
-```
-% mkdir Grobid_Shadow_Bulk_1Ms_20210113
-% cd Grobid_Shadow_Bulk_1Ms_20210113
-% split -l 1000000 -d --additional-suffix='.json' ../Shadow_20210113/grobid_shadow_bulk.20210113.json file_
-```
-
-3) Extract metadata into form suitable for loading into Postgres, creating 9 `insert_shadow_synopsis_20210113_0*.sql`  files
-
-```
-% python analyze_shadow_json.py
-```
-
-4) Load metadata into Postgres `shadow` table, and create indices. (Needs Postgres running: conventionally, on thetalogin1.)
-
-```
-% export PGHOST=/tmp
-% psql -p 12345 -d postgres -f create_shadow_table.sql
-% source LOAD_SHADOW.sh
-% psql -p 12345 -d postgres -f index_shadow_table.sql
-```
-
-Some queries:
-```
-select count(*) from shadow --> 83030736
-select count(distinct key) from shadow --> 82330125  ==>  700611 duplicates
-select  lang, count(*) as count  from shadow group by lang  order by  count desc
+1. Split into 1M-line files
+    ```
+    % mkdir Grobid_Shadow_Bulk_1Ms_20210113
+    % cd Grobid_Shadow_Bulk_1Ms_20210113
+    % split -l 1000000 -d --additional-suffix='.json' ../Shadow_20210113/grobid_shadow_bulk.20210113.json file_
+    ```
+1. Extract metadata into form suitable for loading into Postgres, creating 9 `insert_shadow_synopsis_20210113_0*.sql`  files
+    ```
+    % python analyze_shadow_json.py
+    ```
+1. Load metadata into Postgres `shadow` table, and create indices. (Needs Postgres running: conventionally, on thetalogin1.)
+    ```
+    % export PGHOST=/tmp
+    % psql -p 12345 -d postgres -f create_shadow_table.sql
+    % source LOAD_SHADOW.sh
+    % psql -p 12345 -d postgres -f index_shadow_table.sql
+    ```
+    Some queries:
+    ```
+    select count(*) from shadow --> 83030736
+    select count(distinct key) from shadow --> 82330125  ==>  700611 duplicates
+    select  lang, count(*) as count  from shadow group by lang  order by  count desc
              en    | 75643546
              de    |  3125088
              fr    |  1224352
@@ -84,29 +80,19 @@ select  lang, count(*) as count  from shadow group by lang  order by  count desc
              it    |   268020
              pt    |   187018
              nl    |   120453
-```
-
-5) Create a file containing the keys for just english language documents
-
-In postgres:
-```
-\copy (select key from shadow where lang='en') to '/projects/SuperBERT/foster/Ians-Data/english_key.csv' csv
-```
-
-6) Extract sentences from the documents with keys extracted in step #5.
-
-```
-% source RUN_*.sh
-```
-
-7) Count results based on log_XX.err files:
-
-```
-% source COUNT.sh
-```
-
-Counts: English: 75562967 Other: 7510189 JSON-failed: 1862384 (2.3%?)
-
-`select count(distinct key) from shadow where lang='en';` --> 74987356
-
-
+    ```
+1. Create a file containing the keys for just english language documents.
+    In postgres:
+    ```
+    \copy (select key from shadow where lang='en') to '/projects/SuperBERT/foster/Ians-Data/english_key.csv' csv
+    ```
+1. Extract sentences from the documents with keys extracted in step #5.
+    ```
+    % source RUN_*.sh
+    ```
+1. Count results based on log_XX.err files:
+    ```
+    % source COUNT.sh
+    ```
+    Counts: English: 75562967 Other: 7510189 JSON-failed: 1862384 (2.3%?)
+    `select count(distinct key) from shadow where lang='en';` --> 74987356
