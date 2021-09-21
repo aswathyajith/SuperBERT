@@ -1,5 +1,18 @@
 # The Postgres database
 
+## Tables
+
+The following are tables of some interest:
+
+
+| Name  | Description | 
+| ------------- | ------------- | 
+| shadow  | The main table, with contents described below | 
+| shadow_file_index | Maps from keys in shadow to file number + line number |
+
+
+## Shadow table
+
 The table `shadow` has columns as follows:
 
 | Name  | Type | Description | Index? | 
@@ -51,6 +64,7 @@ E.g.,:
 4) Load metadata into Postgres `shadow` table, and create indices. (Needs Postgres running: conventionally, on thetalogin1.)
 
 ```
+% export PGHOST=/tmp
 % psql -p 12345 -d postgres -f create_shadow_table.sql
 % source LOAD_SHADOW.sh
 % psql -p 12345 -d postgres -f index_shadow_table.sql
