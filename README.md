@@ -234,6 +234,7 @@ wget "https://s3-us-west-2.amazonaws.com/ai2-s2-research/scibert/pytorch_models/
 tar -xvf scibert_scivocab_cased.tar
 tar -xvf scibert_scivocab_uncased.tar
 cd ..
+
 ```
 
 3. Modify script `scripts/train_allennlp_local.sh` to update the task and dataset. E.g. `TASK="ner"` and `DATASET="bc5cdr"`.
