@@ -1,3 +1,35 @@
+# The Postgres database
+
+The table `shadow` has columns as follows:
+
+| Name  | Type | Description | Index? | 
+| ------------- | ------------- | ---- | ---- | 
+| SID  | bigserial  | Automatically generated sequence id (ignore) | Auto | 
+| DOI  | varchar(200)  | DOI | Yes | 
+| Titl | text | Article title |Full text |
+| Year |  char(4)   | | Yes |
+| Lang |  varchar(50)  | Language, e.g., en for english | Yes |
+| Jour |  text  | Journal title | Full text | 
+| Key  |  char(40)  | Hash | Yes |
+| PMID  | varchar(40)  | PubMed ID (when available)| Yes |
+
+A full text index is created e.g. via `CREATE INDEX titl_idx ON shadow USING gin(to_tsvector('pg_catalog.english', titl));`
+
+E.g.,:
+
+| Name  | Value |
+| ------------- | ------------- | 
+| SID  | 25808589 |
+| DOI  | 10.2307/3694202 |
+| Titl | Nature of the Services of a Flagman at a Crossing under the Federal Employers Liability Act |
+| Year |  1920| | 
+| Lang |  en | 
+| Jour |  Law Review and American Law Register | 
+| Key  |  e2c2b47076a66e235707bafcbade8c5bc0f8e488| | 
+| PMID  |                |
+
+
+
 # Steps used to preprocess PRO dataset
 
 1) Start with `Grobid_Shadow_Bulk_1Ms_20210113`
