@@ -66,7 +66,7 @@ The PRO dataset is provided in a single large file, `Grobid_Shadow_Bulk_1Ms_2021
     % cd Grobid_Shadow_Bulk_1Ms_20210113
     % split -l 1000000 -d --additional-suffix='.json' ../Shadow_20210113/grobid_shadow_bulk.20210113.json file_
     ```
-1. Extract metadata into form suitable for loading into Postgres, creating 9 `insert_shadow_synopsis_20210113_0*.sql`  files
+1. Extract metadata into form suitable for loading into Postgres, creating 9 `insert_shadow_synopsis_20210113_0*.sql`  files. The program `analyze_shadow_json.py` extracts metadata from the supplied `shadow_file_grobid.2020-01-16.json`. 
     ```
     % python analyze_shadow_json.py
     ```
