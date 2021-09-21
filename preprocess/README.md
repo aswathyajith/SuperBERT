@@ -11,6 +11,17 @@ The PRO dataset is provided in a single large file, `Grobid_Shadow_Bulk_1Ms_2021
 
 This process may appear somewhat inefficient (and it is not fast), but we haven not found a better approach. (An attempt to create one file per article crashed the Theta file system!)
 
+In summary: to create a new training set, follow the steps described in **Extracting sentences for a particular subset of documents** below.
+
+## Things to do
+
+1. Work out why many articles do not have a title. Bug or feature?
+    1. `select count(*) from shadow where jour=''` --> 51,620,295
+    2. `select count(*) from shadow where titl=''` --> 16,358,957
+1. Expand the Postgres index to include abstracts:
+    1. Extract first so many words 
+1. Update the `shadow_file_index` table to provide location of each document in the "85 files." (That table is currently out of date.)
+
 # The Postgres database
 
 ## The `shadow` table
@@ -89,12 +100,12 @@ We use an example to show how we extract sentences for a particular subset of PR
     ```
     \copy (select key from shadow where lang='en') to '/projects/SuperBERT/foster/Ians-Data/english_key.csv' csv
     ```
-1. Extract sentences from the documents with the keys in `english_key.csv`, creating in a directory `BB` a set of sentence files (`sentence_00.txt`, etc.) and log files (`log_00.err`, etc.), one for each of the 85 files of 1M articles each created in the preparatory step.
+1. Extract sentences from the documents with the keys in `english_key.csv`, creating in a directory `BB` a set of sentence files (`sentence_00.txt`, etc.) and log files (`log_00.err`, etc.), one for each of the 85 files of 1M articles each created in the preparatory step. The Python program `extract_xml_with_index.py` does this; the script `RUN_EXTRACTS.sh` applies it to each of the 85 files:
     ```
     % source RUN_EXTRACTS.sh
     ```
 
-Each `log_XX.err` file has a line per article, with a Y, N, or E, plus a key. We can count the results based on the files, as follows:
+Each `log_XX.err` file has a line per article, with a Y (article found, sentences extracted), N (article skipped as not in supplied keys file), or E (JSON parsing error), plus a key. We can count the results based on the files, as follows:
 
 ```
 % source COUNT.sh
