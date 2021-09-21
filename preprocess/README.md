@@ -16,11 +16,13 @@ In summary: to create a new training set, follow the steps described in **Extrac
 ## Things to do
 
 1. Work out why many articles do not have a title. Bug or feature?
-    1. `select count(*) from shadow where jour=''` --> 51,620,295
-    2. `select count(*) from shadow where titl=''` --> 16,358,957
+    1. As evidence of difficulty:
+        1. `select count(*) from shadow where jour=''` --> 51,620,295
+        2. `select count(*) from shadow where titl=''` --> 16,358,957
+    1. Possible solution: use Crossref API to look things up. However, lookup rate is onlyn around 6/sec. We have asked crossref to see if we can get a dump.
 1. Expand the Postgres index to include abstracts:
-    1. Extract first so many words 
-1. Update the `shadow_file_index` table to provide location of each document in the "85 files." (That table is currently out of date.)
+    1. Extract first so many words and build full text index.
+1. Update the `shadow_file_index` table to provide location of each document in the "85 files." (That table is currently out of date.) This may help finding a single article based on its key.
 
 # The Postgres database
 
