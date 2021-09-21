@@ -46,3 +46,21 @@ In postgres:
 ```
 \copy (select key from shadow where lang='en') to '/projects/SuperBERT/foster/Ians-Data/english_key.csv' csv
 ```
+
+6) Extract sentences from the documents with keys extracted in step #5.
+
+```
+% source RUN_*.sh
+```
+
+7) Count results based on log_XX.err files:
+
+```
+% source COUNT.sh
+```
+
+Counts: English: 75562967 Other: 7510189 JSON-failed: 1862384 (2.3%?)
+
+`select count(distinct key) from shadow where lang='en';` --> 74987356
+
+
