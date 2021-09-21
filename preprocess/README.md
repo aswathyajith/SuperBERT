@@ -1,19 +1,8 @@
 # The Postgres database
 
-## Tables
+## The `shadow` table
 
-The following are tables of some interest:
-
-
-| Name  | Description | 
-| ------------- | ------------- | 
-| shadow  | The main table, with contents described below | 
-| shadow_file_index | Maps from keys in shadow to file number + line number |
-
-
-## Shadow table
-
-The table `shadow` has columns as follows:
+The `shadow` table is created from the source PRO data, as described later, by extracting selected metadata from the supplied XML. This allows for identification of articles via searches on language, year, title, author, etc.
 
 | Name  | Type | Description | Index? | 
 | ------------- | ------------- | ---- | ---- | 
