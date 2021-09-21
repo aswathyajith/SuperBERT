@@ -1,3 +1,16 @@
+# Overview
+
+The PRO dataset is provided in a single large file, `Grobid_Shadow_Bulk_1Ms_20210113`, with one line per article, each line being an XML document produced by [GROBID](https://grobid.readthedocs.io/en/latest/). The approx. 85M articles have around 10B sentences. Ideally, we might load all of these sentences into a database so that we could ask for, e.g., "all sentences that come from articles about genetics." However, in practice it doesn't seem possible to create such an index, so instead we have to operate in phases, as follows:
+
+1. Preparatory
+    1. We break the PRO dataset into 85 files, each with 1M articles (one article per line)
+    2. We create a Postgre database table `shadow` with title, language, journal for each article.
+1. Create training dataset
+    1. Use SQL query on `shadow` to identify keys for articles of interest
+    2. Use SQL query on XX to identify locations of those articles
+    3. Extract sentences from each of those articles
+
+
 # The Postgres database
 
 ## The `shadow` table
@@ -8,8 +21,8 @@ The `shadow` table is created from the source PRO data, as described later, by e
 | ------------- | ------------- | ---- | ---- | 
 | SID  | bigserial  | Automatically generated sequence id (ignore) | Auto | 
 | DOI  | varchar(200)  | DOI | Yes | 
-| Titl | text | Article title |Full text |
-| Year |  char(4)   | | Yes |
+| Titl | text | Article title (sometimes missing) |Full text |
+| Year |  char(4)   | Publication year (sometimes missing) | Yes |
 | Lang |  varchar(50)  | Language, e.g., en for english | Yes |
 | Jour |  text  | Journal title | Full text | 
 | Key  |  char(40)  | Hash | Yes |
@@ -24,10 +37,10 @@ E.g.,:
 | SID  | 25808589 |
 | DOI  | 10.2307/3694202 |
 | Titl | Nature of the Services of a Flagman at a Crossing under the Federal Employers Liability Act |
-| Year |  1920| | 
+| Year |  1920|
 | Lang |  en | 
 | Jour |  Law Review and American Law Register | 
-| Key  |  e2c2b47076a66e235707bafcbade8c5bc0f8e488| | 
+| Key  |  e2c2b47076a66e235707bafcbade8c5bc0f8e488|
 | PMID  |                |
 
 
@@ -70,18 +83,23 @@ Start with `Grobid_Shadow_Bulk_1Ms_20210113`
              pt    |   187018
              nl    |   120453
     ```
-1. Create a file containing the keys for just english language documents.
-    In postgres:
+## Extracting sentences
+We use an example to show how we extract sentences for a particular subset of PRO articles, in this case all articles with `language='en'`.
+
+1. In Postgres, create a file containing the keys for the articles of interest.
     ```
     \copy (select key from shadow where lang='en') to '/projects/SuperBERT/foster/Ians-Data/english_key.csv' csv
     ```
-1. Extract sentences from the documents with keys extracted in step #5.
+1. Extract sentences from the documents with the keys in `english_key.csv`, creating in a directory `BB` a set of sentence files (`sentence_00.txt`, etc.) and log files (`log_00.err`, etc.), one for each of the 85 files of 1M articles each created in the preparatory step.
     ```
-    % source RUN_*.sh
+    % source RUN_EXTRACTS.sh
     ```
-1. Count results based on log_XX.err files:
-    ```
-    % source COUNT.sh
-    ```
+
+Each `log_XX.err` file has a line per article, with a Y, N, or E, plus a key. We can count the results based on the files, as follows:
+
+```
+% source COUNT.sh
     Counts: English: 75562967 Other: 7510189 JSON-failed: 1862384 (2.3%?)
-    `select count(distinct key) from shadow where lang='en';` --> 74987356
+```
+    
+See also the numbers in `shadow`: `select count(distinct key) from shadow where lang='en';` --> 74987356. Not sure why they don't quite match.
