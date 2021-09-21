@@ -4,12 +4,12 @@ The PRO dataset is provided in a single large file, `Grobid_Shadow_Bulk_1Ms_2021
 
 1. Preparatory
     1. We break the PRO dataset into 85 files, each with 1M articles (one article per line)
-    2. We create a Postgre database table `shadow` with title, language, journal for each article.
+    2. We create a Postgre database table `shadow` with title, language, journal, and key (i.e., hash id) for each article.
 1. Create training dataset
-    1. Use SQL query on `shadow` to identify keys for articles of interest
-    2. Use SQL query on XX to identify locations of those articles
-    3. Extract sentences from each of those articles
+    1. Use SQL query on `shadow` to identify keys for articles of interest, creating a file containing those keys.
+    2. Scan through the 85 files, extractings sentences only for those documents identified in (i)
 
+This process may appear somewhat inefficient (and it is not fast), but we haven not found a better approach. (An attempt to create one file per article crashed the Theta file system!)
 
 # The Postgres database
 
@@ -45,11 +45,9 @@ E.g.,:
 
 
 
-# Steps used to preprocess PRO dataset
+# Creating the `shadow` table, in detail
 
 The PRO dataset is provided in a single large file, `Grobid_Shadow_Bulk_1Ms_20210113`, with one line per article, each line being an XML document produced by [GROBID](https://grobid.readthedocs.io/en/latest/). We process these data to create a Postgre database table `shadow` with title, language, journal for each article. 
-
-Start with `Grobid_Shadow_Bulk_1Ms_20210113`
 
 1. Split into 1M-line files
     ```
@@ -83,7 +81,8 @@ Start with `Grobid_Shadow_Bulk_1Ms_20210113`
              pt    |   187018
              nl    |   120453
     ```
-## Extracting sentences
+    
+## Extracting sentences for a particular subset of documents, in detail
 We use an example to show how we extract sentences for a particular subset of PRO articles, in this case all articles with `language='en'`.
 
 1. In Postgres, create a file containing the keys for the articles of interest.
