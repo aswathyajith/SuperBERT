@@ -20,10 +20,10 @@ In summary: to create a new training set, follow the steps described in **Extrac
         1. `select count(*) from shadow where jour=''` --> 51,620,295
         2. `select count(*) from shadow where titl=''` --> 16,358,957
     1. Possible solution: use Crossref API to look things up. However, lookup rate is only around 6/sec (see `get_doi_data.py`).
-        1. Crossref has supplied a list of 100M DOI files, these are currently downloading.
-        2. Then extract relevant metadata (article title and journal name?) and load into Postgres.
+        1. Crossref posted a [set of 100+M DOI records](https://www.crossref.org/blog/new-public-data-file-120-million-metadata-records/) earlier in 2021, these are currently downloading. (They note that for later articles, use the [REST API](https://github.com/CrossRef/rest-api-doc/blob/master/api_tips.md) -- and see `get_doi_data.py`).
+        2. Then extract relevant metadata (article title and journal name?) and load into Postgres (`LOAD_ABSTRACTS.sh`).
 1. Expand the Postgres index to include abstracts:
-    1. Modifid `analyze_shadow_json.py` to extract first 200 words of text.
+    1. Modified `analyze_shadow_json.py` to extract first 200 words of text, and wrote `prepare_abstract_insert.py` to generate SQL inserts. Use  `LOAD_ABSTRACTS.sh` to create table and load insert files into PostGres.
     2. Then build full text index.
 1. Update the `shadow_file_index` table to provide location of each document in the "85 files." (That table is currently out of date.) This may help finding a single article based on its key. (If I recall correctly, I tried this as an alternative to scanning all files, but it was slower, at least for large subsets.)
 
